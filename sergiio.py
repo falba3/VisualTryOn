@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import google.generativeai as gen
+from dotenv import load_dotenv
 
 DEFAULT_PROMPTS: List[Tuple[str, str]] = [
     (
@@ -39,17 +40,10 @@ DEFAULT_PROMPTS: List[Tuple[str, str]] = [
 
 
 def load_env_api_key() -> str:
-    """Lightweight .env loader to avoid extra dependencies."""
+    """Load GOOGLE_API_KEY from environment or .env via python-dotenv."""
     env_path = Path(".env")
     if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            stripped = line.strip()
-            if not stripped or stripped.startswith("#") or "=" not in stripped:
-                continue
-            key, value = stripped.split("=", 1)
-            key = key.strip()
-            if key and key not in os.environ:
-                os.environ[key] = value.strip().strip('"').strip("'")
+        load_dotenv(env_path)
     return os.getenv("GOOGLE_API_KEY", "")
 
 
