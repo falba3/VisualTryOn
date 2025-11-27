@@ -96,9 +96,9 @@ def main():
     parser.add_argument("--face", required=True, help="Path to the person/face image")
     # Define a hardcoded prompt for the image generation
     script_defined_prompt = (
-        "Generate a photorealistic image of the person wearing a modern, stylish jacket. "
+        "Generate a photorealistic image of the person. "
         "Maintain the person's identity, facial features, body proportions, and lighting. "
-        "The background should be a subtle, blurred outdoor scene."
+        "Same young man, same outfit and headphones around neck, sitting by a window in a bright cafe with natural light. He holds and sips a to-go coffee cup, relaxed posture that shows how the hoodie sits when seated, soft shadows, warm tones, realistic lifestyle photo." 
     )
     parser.add_argument("--out", default="", help="Optional output file path (first image)")
     args = parser.parse_args()
