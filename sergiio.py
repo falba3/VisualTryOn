@@ -12,8 +12,9 @@ import os
 from pathlib import Path
 from typing import List, Tuple
 
+import google.api_core.exceptions as g_exceptions
 import google.generativeai as gen
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 DEFAULT_PROMPTS: List[Tuple[str, str]] = [
     (
@@ -40,10 +41,11 @@ DEFAULT_PROMPTS: List[Tuple[str, str]] = [
 
 
 def load_env_api_key() -> str:
-    """Load GOOGLE_API_KEY from environment or .env via python-dotenv."""
-    env_path = Path(".env")
-    if env_path.exists():
-        load_dotenv(env_path)
+    """Load GOOGLE_API_KEY from environment or nearest .env via python-dotenv."""
+    dotenv_path = find_dotenv()
+    if dotenv_path:
+        # override=True so a system variable like "no" doesn't mask the .env value
+        load_dotenv(dotenv_path=dotenv_path, override=True)
     return os.getenv("GOOGLE_API_KEY", "")
 
 
@@ -74,7 +76,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate Gemini Nano Banana variations from a reference portrait.")
     parser.add_argument("--image", required=True, help="Path to the reference portrait.")
     parser.add_argument("--output-dir", default="outputs", help="Directory to save generated images.")
-    parser.add_argument("--model", default="models/gemini-2.0-nano-banana", help="Gemini model name to use.")
+    parser.add_argument(
+        "--model",
+        default="models/gemini-2.0-flash-exp",
+        help="Gemini model name to use (must support image outputs, e.g., models/gemini-2.0-flash-exp).",
+    )
     parser.add_argument("--prompt", help="Custom prompt to generate a single image (skips preset scenarios).")
     parser.add_argument(
         "--only",
@@ -106,10 +112,18 @@ def main() -> None:
 
     for name, prompt in prompts:
         print(f"[+] Generating {name} ...")
-        response = model.generate_content(
-            [image_part, prompt],
-            generation_config={"response_mime_type": "image/png"},
-        )
+        try:
+            response = model.generate_content(
+                [image_part, prompt],
+                generation_config={"response_mime_type": "image/png"},
+            )
+        except g_exceptions.InvalidArgument as err:
+            raise SystemExit(
+                "The API rejected image output (response_mime_type=image/png). "
+                "Your key/project likely only supports text outputs for this model. "
+                "Use an image-capable Gemini model that supports inline PNG (for example, models/gemini-2.0-flash-exp) "
+                "and confirm your account has image generation enabled."
+            ) from err
         png_bytes = extract_image_bytes(response)
         out_path = output_dir / f"{name}.png"
         out_path.write_bytes(png_bytes)
