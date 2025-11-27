@@ -98,7 +98,7 @@ def main():
     script_defined_prompt = (
         "Generate a photorealistic image of the person. "
         "Maintain the person's identity, facial features, body proportions, and lighting. "
-        "Same young man, same outfit and headphones around neck, sitting by a window in a bright cafe with natural light. He holds and sips a to-go coffee cup, relaxed posture that shows how the hoodie sits when seated, soft shadows, warm tones, realistic lifestyle photo." 
+        "Same young man, same outfit, running towards the subway. He holds a white bag on his right hand, with worrying posture that shows how the hoodie fits when in motion, soft shadows, warm tones, realistic lifestyle photo." 
     )
     parser.add_argument("--out", default="", help="Optional output file path (first image)")
     args = parser.parse_args()
