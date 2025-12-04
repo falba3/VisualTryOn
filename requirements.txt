@@ -1,3 +1,0 @@
-google
-python-dotenv
-google.genai
